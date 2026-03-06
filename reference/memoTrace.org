@@ -1,0 +1,133 @@
+* database
+不管是微信3还是微信4，聊天数据、图片、视频、文件、表情包、语音都是存储在不同的数据库中的，因此解析一条聊天记录要综合查询多个数据库的内容。
+
+* 微信4
+text
+├─db_storage
+│  │
+│  ├─biz
+│  │      biz.db
+│  ├─contact                    # 联系人
+│  │      contact.db
+│  │      contact_fts.db
+│  │      fmessage_new.db
+│  │      wa_contact_new.db
+│  ├─emoticon                   # 表情包
+│  │      emoticon.db
+│  ├─favorite                   # 微信收藏
+│  │      favorite.db
+│  │      favorite_fts.db
+│  ├─hardlink                   # 微信图片、视频、文件
+│  │      hardlink.db
+│  ├─head_image                 # 微信头像
+│  │      head_image.db
+│  ├─ilinkvoip
+│  │      ilinkvoip.db
+│  ├─message                    # 聊天记录
+│  │      biz_message_0.db      # 公众号消息
+│  │      media_0.db            # 语音消息
+│  │      message_0.db          # 聊天记录
+│  │      message_1.db
+│  │      message_fts.db
+│  │      message_resource.db
+│  │      message_revoke.db
+│  ├─newtips
+│  │      newtips.db
+│  ├─session                    # 聊天会话窗口
+│  │      session.db
+│  ├─sns                        # 朋友圈
+│  │      sns.db
+│  ├─teenager
+│  │      teenager.db
+│  ├─tencentpay
+│  │      tencentpay.db
+│  ├─wcfinder
+│  │      wcfinder.db
+│  └─websearch
+│          websearch.db
+
+* 图片
+转载自：https://blog.lc044.love/post/13
+微信4.0之前的图片都采用了最简单的异或加密，即采用一个异或密钥（一个0-255的整数）与图片文件的每个字节进行异或运算。由于异或运算具有可逆性，采用相同的密钥再做一次异或运算即可得到原始图片文件。
+
+异或运算性质
+
+    交换律： A ^ B = B ^ A
+    结合律： ( A ^ B ) ^ C = A ^ ( B ^ C )
+    自反性： A ^ B ^ B = A
+
+假设：
+
+    加密后数据：C
+    已知的原始文件头（Magic Number）：P
+    密钥：K
+    密钥长度：L
+    第 i 个字节：i
+
+不同格式的图片通常有固定的文件头，例如：
+
+    PNG: 89 50 4E 47 0D 0A 1A 0A
+    JPG: FF D8 FF E0 或 FF D8 FF DB
+    BMP: 42 4D
+    GIF: 47 49 46 38 39 61 或 47 49 46 38 37 61
+
+根据异或运算的性质：
+
+Ci​=Pi​⊕Ki​
+
+可得：
+
+Ki​=Ci​⊕Pi​
+
+所以，我们可以通过已知的加密数据 C 和已知的文件头 P 计算密钥的前 L 个字节：
+
+K0​=C0​⊕P0​
+K1​=C1​⊕P1​
+...
+KL−1​=CL−1​⊕PL−1​
+
+密钥是一个0-255范围内的整数所以: key=K0​=K1​=K2​⋅⋅⋅=KL−1​
+
+** 微信4
+微信4的图片采用AES-EBC和异或混合加密方式。
+
+.dat文件头(15个字节)
+大小(字节)	内容/类型	说明
+6	0x07085631	.dat文件标识符
+4	int （小端序）	AES-EBC128 加密长度
+4	int （小端序）	异或加密长度
+1	0x01	未知
+
+dat文件头
+
+文件末尾采用异或加密，加密长度最大为1MB，多余部分未加密。
+
+例如：一个文件小于1kB，则全部是AES加密，如果大于1kB且小于1MB（实际是1MB零1KB），则前1KB部分采用AES加密，剩余部分采用异或加密。如果文件大于1MB，则前1KB采用AES加密，后面1MB采用异或加密，中间部分未加密。
+
+dat文件结构
+
+    AES 密钥为：0xcfcd208495d565ef
+    根据异或运算的可逆性，结合jpg文件末尾的 FF D9 两个字节，可以找一张微信生成的缩略图（一般为_t.dat结尾），两次异或运算即可得到异或密钥。
+
+* 微信文件、文件夹命名规则
+微信4
+
+text
+├─business
+├─cache             # 缓存
+├─config            # 配置文件
+├─db_storage        # 聊天记录数据库
+├─msg               # 与好友的聊天数据
+│  ├─attach         # 微信里与每个人的聊天数据
+│  │  └─aefd036248e0d4d0f07900a6239272e4    # 该联系人wxid的md5加密
+│  │  │  ├─2022-01                          # 日期
+│  │  │  │  ├─Img                           # 聊天图片
+│  │  │  │  └─Rec                           # 合并转发的聊天记录数据
+│  │  │  │      └─2090_136022
+│  │  │  │          └─Img
+│  ├─file           # 微信文件
+│  └─video          # 微信视频
+├─Msg               # 聊天记录数据库
+└─temp
+
+微信4的文件命名方式跟之前有些微区别，但其数据存放是类似的（文件、视频单独存放在独立的文件夹中，图片按联系人分组存放到不同的文件夹中）

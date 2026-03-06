@@ -18,11 +18,9 @@ import os
 from typing import Union, List
 from Crypto.Cipher import AES
 # from Crypto.Cipher import AES # 如果上面的导入失败，可以尝试使用这个
-
 from .utils import wx_core_error, wx_core_loger
 
 SQLITE_FILE_HEADER = "SQLite format 3\x00"  # SQLite文件头
-
 KEY_SIZE = 32
 DEFAULT_PAGESIZE = 4096
 
