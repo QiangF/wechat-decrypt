@@ -54,3 +54,32 @@ Favorites - favorites.db - 收藏
 favorites.db 里面有 8 张表，其中最重要的是两个，FavoriteItemTable 和 FavoriteSearchTable。
 FavoriteSearchTable 给了收藏的标题和 localID。
 FavoriteItemTable 给了收藏时间戳，收藏内容链接，以及收藏内容来源用户等，并且可以和 FavoriteSearchTable 通过 localID 互相索引。
+
+https://github.com/WQdream/wx-cache-read
+127M	db_storage/message
+23M	db_storage/contact
+
+17M	db_storage/favorite
+21M	business/favorite/thumb
+23M	business/favorite/mid
+
+67M	business/favorite/data
+70M	cache
+
+# related
+https://github.com/bugtest/wechat-favorites-export
+https://github.com/gzxmren/wechat_gzh_downloader
+
+gui automation
+https://github.com/Vincentlz/WchatCollection
+https://github.com/Hello-Mr-Crab/pywechat
+https://github.com/LAVARONG/wechat-automation-api
+https://github.com/pmhw/winautowx
+
+# 视频号
+https://github.com/nobiyou/wx_channel
+
+# todo
+1. 抓取收藏的链接，形成知识库
+https://github.com/git-zyyang/reading-inbox
+2. 抓取点赞收藏的视频并下载
