@@ -27,7 +27,7 @@ DEFAULT_ITER = 4000
 
 key = "a91223dd702248fa96456cdd57e6bc8689d7c1f42bc1444c9e7e115bcb38270f"
 db_storage_path = "/home/q/Documents/xwechat_files/F100001765807792_a28d/db_storage"
-
+db_storage_path = "/tmp/my_cache/db_storage"
 # db_path = "/home/q/Documents/xwechat_files/F100001765807792_a28d/db_storage/favorite/favorite.db"
 # out_path = "/tmp/my_tmp"
 # # password = key.encode()
